@@ -1,19 +1,13 @@
 import httpStatus from 'http-status';
 
-import { NextFunction, Request, RequestHandler, Response } from 'express';
 import sendResponse from '../../utils/sendResponse';
 import { UserServices } from './user.service';
-
-const catchAsync = (fn: RequestHandler) => {
-  return (req: Request, res: Response, next: NextFunction) => {
-    Promise.resolve(fn(req, res, next)).catch((err) => next(err));
-  };
-};
+import catchAsync from '../../utils/catchAsync';
 
 const createStudent = catchAsync(async (req, res) => {
   const { password, student: studentData } = req.body;
   // const zodParsedData = studentValidationSchema.parse(studentData);
-  
+
   const result = await UserServices.createStudentIntoDB(password, studentData);
 
   sendResponse(res, {
