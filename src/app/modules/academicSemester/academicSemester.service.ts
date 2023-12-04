@@ -4,6 +4,14 @@ import { AcademicSemester } from './academicSemester.model';
 
 const createAcademicSemesterIntoDB = async (payload: TAcademicSemester) => {
   // check semester name and code
+  const isSemesterExist = await AcademicSemester.findOne({
+    name: payload.name,
+    year: payload.year
+  });
+
+  if (isSemesterExist) {
+    throw new Error('This Semester is already exists ');
+  }
   if (academicSemesterNameCodeMapper[payload.name] !== payload.code) {
     throw new Error('Invalid semester code');
   }
@@ -17,7 +25,32 @@ const getAllAcademicSemesterFromDB = async () => {
   return result;
 };
 
+const getSingleSemesterFromDB = async (id: string) => {
+  const result = await AcademicSemester.findById(id);
+  return result;
+};
+
+const updateAcademicSemesterIntoDB = async (
+  id: string,
+  payload: Partial<TAcademicSemester>,
+) => {
+  
+  if (
+    payload.name &&
+    payload.code &&
+    academicSemesterNameCodeMapper[payload.name] !== payload.code
+  ) {
+    throw new Error('Invalid Semester Code');
+  }
+  const result = await AcademicSemester.findOneAndUpdate({ _id: id }, payload, {
+    new: true,
+  });
+  return result;
+};
+
 export const AcademicSemesterServices = {
   createAcademicSemesterIntoDB,
   getAllAcademicSemesterFromDB,
+  getSingleSemesterFromDB,
+  updateAcademicSemesterIntoDB,
 };
