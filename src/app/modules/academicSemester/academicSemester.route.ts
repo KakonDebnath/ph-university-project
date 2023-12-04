@@ -14,8 +14,8 @@ router.post(
 );
 
 router.get(
-  '/get-all-academic-semesters',
-  AcademicSemesterControllers.getAllAcademicSemester,
+  '/',
+  AcademicSemesterControllers.getAllAcademicSemesterFromDB,
 );
 
 router.get('/:id', AcademicSemesterControllers.getSingleSemesterFromDB);
