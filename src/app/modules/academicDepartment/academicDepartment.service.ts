@@ -6,14 +6,14 @@ const createAcademicDepartmentIntoDB = async (payload: TAcademicDepartment) => {
     name: payload.name,
   });
   if (isAcademicDepartmentExist) {
-    throw new Error('This Faculty is already exists!');
+    throw new Error('This Department is already exists!');
   }
   const result = await AcademicDepartment.create(payload);
   return result;
 };
 
 const getAllAcademicDepartmentFormDB = async () => {
-  const result = await AcademicDepartment.find();
+  const result = await AcademicDepartment.find().populate('academicFaculty');
   return result;
 };
 
