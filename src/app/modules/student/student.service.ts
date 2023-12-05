@@ -13,6 +13,9 @@ const getAllStudentsFromDB = async () => {
         path: 'academicFaculty',
       },
     });
+  if (!result.length) {
+    throw new AppError(httpStatus.NOT_FOUND, 'No Data Found');
+  }
   return result;
 };
 
@@ -26,6 +29,10 @@ const getSingleStudentFromDB = async (id: string) => {
         path: 'academicFaculty',
       },
     });
+
+  if (!result) {
+    throw new AppError(httpStatus.NOT_FOUND, 'No Data Found');
+  }
   return result;
 };
 
