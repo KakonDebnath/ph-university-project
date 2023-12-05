@@ -30,7 +30,7 @@ const updateAcademicDepartment = async (
     { _id: id },
     payload,
     {
-      timestamps: true,
+      new: true,
     },
   );
   return result;
