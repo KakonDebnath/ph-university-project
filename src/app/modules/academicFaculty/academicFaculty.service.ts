@@ -1,3 +1,5 @@
+import httpStatus from 'http-status';
+import AppError from '../../errors/AppError';
 import { TAcademicFaculty } from './academicFaculty.interface';
 import { AcademicFaculty } from './academicFaculty.model';
 
@@ -6,7 +8,7 @@ const createAcademicFacultyIntoDB = async (payload: TAcademicFaculty) => {
     name: payload.name,
   });
   if (isAcademicFacultyExist) {
-    throw new Error('This Faculty is already exists ');
+    throw new AppError(httpStatus.NOT_FOUND, 'This Faculty is already exists ');
   }
   const result = await AcademicFaculty.create(payload);
   return result;
