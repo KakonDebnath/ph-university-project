@@ -8,7 +8,10 @@ const createAcademicDepartmentIntoDB = async (payload: TAcademicDepartment) => {
     name: payload.name,
   });
   if (isAcademicDepartmentExist) {
-    throw new AppError(httpStatus.NOT_FOUND, 'This Department is already exists!');
+    throw new AppError(
+      httpStatus.NOT_FOUND,
+      `This ${payload.name} Department is already exists!`,
+    );
   }
   const result = await AcademicDepartment.create(payload);
   return result;
