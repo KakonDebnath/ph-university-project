@@ -1,4 +1,4 @@
-
+import { studentValidations } from './student.validation';
 import httpStatus from 'http-status';
 import sendResponse from '../../utils/sendResponse';
 import { StudentServices } from './student.service';
@@ -27,6 +27,17 @@ const getAllStudents = catchAsync(async (req, res) => {
   });
 });
 
+const updateStudent = catchAsync(async (req, res) => {
+  const { studentId } = req.params;
+  const result = await StudentServices.updateStudentIntoDB(studentId, req.body.student);
+
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: 'Student is Updated successfully',
+    data: result,
+  });
+});
 const deleteStudent = catchAsync(async (req, res) => {
   const { studentId } = req.params;
   const result = await StudentServices.deleteStudentFromDB(studentId);
@@ -42,5 +53,6 @@ const deleteStudent = catchAsync(async (req, res) => {
 export const StudentControllers = {
   getAllStudents,
   getSingleStudent,
+  updateStudent,
   deleteStudent,
 };
