@@ -10,6 +10,7 @@ import { zodErrorHandler } from '../errors/zodError';
 import { mongooseErrors } from './../errors/mongooseError';
 import mongoose from 'mongoose';
 import { errorResponseProcessor } from '../errors/errorProcessor';
+import AppError from '../errors/AppError';
 
 const globalErrorHandler: ErrorRequestHandler = (err, req, res, next) => {
   // let statusCode = err.statusCode || 500;
@@ -22,8 +23,8 @@ const globalErrorHandler: ErrorRequestHandler = (err, req, res, next) => {
   // ];
 
   const errorResponse: TGenericErrorResponse = {
-    statusCode: err.statusCode || 500,
-    message: err.message || 'Something went wrong!',
+    statusCode: 500,
+    message: 'Something went wrong!',
     errorSources: [
       {
         path: '',
@@ -52,6 +53,24 @@ const globalErrorHandler: ErrorRequestHandler = (err, req, res, next) => {
     errorResponse.statusCode = simplifiedError?.statusCode;
     errorResponse.message = simplifiedError?.message;
     errorResponse.errorSources = simplifiedError?.errorSources;
+  } else if (err instanceof AppError) {
+    errorResponse.statusCode = err?.statusCode;
+    errorResponse.message = err?.message;
+    errorResponse.errorSources = [
+      {
+        path: '',
+        message: err?.message,
+      },
+    ];
+  }
+  else if (err instanceof Error) {
+    errorResponse.message = err?.message;
+    errorResponse.errorSources = [
+      {
+        path: '',
+        message: err?.message,
+      },
+    ];
   }
 
   return res.status(errorResponse.statusCode).json({
