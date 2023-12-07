@@ -32,10 +32,11 @@ const getAllStudentsFromDB = async (query: Record<string, unknown>) => {
     })),
   });
 
+  const excludeFields = ['searchTerm', 'sort', 'limit'];
+  excludeFields.forEach((el) => delete queryObj[el]);
+  
+  
   // for filtering without searchTerm field
-
-  const deleteSearchTermFormQuery = ['searchTerm', 'sort'];
-  deleteSearchTermFormQuery.forEach((el) => delete queryObj[el]);
 
   const searchFilterQuery = searchTermQuery
     .find(queryObj)
@@ -52,7 +53,14 @@ const getAllStudentsFromDB = async (query: Record<string, unknown>) => {
     sort = query.sort as string;
   }
 
-  const result = await searchFilterQuery.sort(sort);
+  const searchSortQuery = searchFilterQuery.sort(sort);
+
+  let limit: number = 1;
+  if (query.limit) {
+    limit = query.limit as number;
+  }
+
+  const result = await searchSortQuery.limit(limit);
 
   if (!result.length) {
     throw new AppError(httpStatus.NOT_FOUND, 'No Data Found');
