@@ -32,10 +32,9 @@ const getAllStudentsFromDB = async (query: Record<string, unknown>) => {
     })),
   });
 
-  const excludeFields = ['searchTerm', 'sort', 'limit'];
+  const excludeFields = ['searchTerm', 'sort', 'limit', 'page', 'fields'];
   excludeFields.forEach((el) => delete queryObj[el]);
-  
-  
+
   // for filtering without searchTerm field
 
   const searchFilterQuery = searchTermQuery
@@ -49,18 +48,39 @@ const getAllStudentsFromDB = async (query: Record<string, unknown>) => {
     });
 
   let sort: string = '-createdAt';
-  if (query.sort) {
-    sort = query.sort as string;
+  if (query?.sort) {
+    sort = query?.sort as string;
   }
 
   const searchSortQuery = searchFilterQuery.sort(sort);
 
-  let limit: number = 1;
-  if (query.limit) {
-    limit = query.limit as number;
+  let page: number = 1;
+  let limit: number = 0;
+  let skip: number = 0;
+
+  if (query?.limit) {
+    limit = Number(query?.limit) as number;
   }
 
-  const result = await searchSortQuery.limit(limit);
+  if (query?.page) {
+    page = Number(query?.page) as number;
+    skip = (page - 1) * limit;
+  }
+
+  const paginationQuery = searchSortQuery.skip(skip);
+
+  const limitQuery = paginationQuery.limit(limit);
+
+  // fields limit
+
+  let fields: string = '-__v';
+
+  if (query?.fields) {
+    fields = (query?.fields as string).split(',').join(' ');
+  }
+
+
+  const result = await limitQuery.select(fields);
 
   if (!result.length) {
     throw new AppError(httpStatus.NOT_FOUND, 'No Data Found');
