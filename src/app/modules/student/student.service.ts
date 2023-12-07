@@ -6,21 +6,40 @@ import { User } from '../user/user.model';
 import { TStudent } from './student.interface';
 
 const getAllStudentsFromDB = async (query: Record<string, unknown>) => {
-  let searchTerm = '';
+
+  const queryObj: Record<string, unknown> = { ...query };
+
+  let searchTerm: string = '';
+
+  const searchAbleField: string[] = [
+    'email',
+    'name.firstName',
+    'presentAddress',
+    'permanentAddress',
+  ];
+
   if (query?.searchTerm) {
     searchTerm = query?.searchTerm as string;
   }
 
-  const result = await Student.find({
-    $or: ['email', 'name.firstName', 'presentAddress', 'permanentAddress'].map(
-      (field) => ({
-        [field]: {
-          $regex: searchTerm,
-          $options: 'i',
-        },
-      }),
-    ),
-  })
+  // for searchTerm query
+
+  const searchTermQuery = Student.find({
+    $or: searchAbleField.map((field) => ({
+      [field]: {
+        $regex: searchTerm,
+        $options: 'i',
+      },
+    })),
+  });
+
+  // for filtering without searchTerm field
+
+  const deleteSearchTermFormQuery = ['searchTerm'];
+  deleteSearchTermFormQuery.forEach((el) => delete queryObj[el]);
+
+  const result = await searchTermQuery
+    .find(queryObj)
     .populate('admissionSemester')
     .populate({
       path: 'academicDepartment',
@@ -28,9 +47,11 @@ const getAllStudentsFromDB = async (query: Record<string, unknown>) => {
         path: 'academicFaculty',
       },
     });
+
   if (!result.length) {
     throw new AppError(httpStatus.NOT_FOUND, 'No Data Found');
   }
+
   return result;
 };
 
@@ -48,6 +69,7 @@ const getSingleStudentFromDB = async (id: string) => {
   if (!result) {
     throw new AppError(httpStatus.NOT_FOUND, 'No Data Found');
   }
+
   return result;
 };
 
@@ -93,11 +115,13 @@ const updateStudentIntoDB = async (id: string, payload: Partial<TStudent>) => {
     new: true,
     runValidators: true,
   });
+
   return result;
 };
 
 const deleteStudentFromDB = async (id: string) => {
   const isStudentExists = await Student.isUserExists(id);
+
   if (!isStudentExists) {
     throw new AppError(httpStatus.NOT_FOUND, 'this student does not exist');
   }
@@ -134,6 +158,7 @@ const deleteStudentFromDB = async (id: string) => {
   } catch (err) {
     await session.abortTransaction();
     await session.endSession();
+
     throw new AppError(httpStatus.BAD_REQUEST, 'Failed to delete student');
   }
 };
