@@ -6,7 +6,6 @@ import { User } from '../user/user.model';
 import { TStudent } from './student.interface';
 
 const getAllStudentsFromDB = async (query: Record<string, unknown>) => {
-
   const queryObj: Record<string, unknown> = { ...query };
 
   let searchTerm: string = '';
@@ -35,10 +34,10 @@ const getAllStudentsFromDB = async (query: Record<string, unknown>) => {
 
   // for filtering without searchTerm field
 
-  const deleteSearchTermFormQuery = ['searchTerm'];
+  const deleteSearchTermFormQuery = ['searchTerm', 'sort'];
   deleteSearchTermFormQuery.forEach((el) => delete queryObj[el]);
 
-  const result = await searchTermQuery
+  const searchFilterQuery = searchTermQuery
     .find(queryObj)
     .populate('admissionSemester')
     .populate({
@@ -47,6 +46,13 @@ const getAllStudentsFromDB = async (query: Record<string, unknown>) => {
         path: 'academicFaculty',
       },
     });
+
+  let sort: string = '-createdAt';
+  if (query.sort) {
+    sort = query.sort as string;
+  }
+
+  const result = await searchFilterQuery.sort(sort);
 
   if (!result.length) {
     throw new AppError(httpStatus.NOT_FOUND, 'No Data Found');
