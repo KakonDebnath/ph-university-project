@@ -5,6 +5,89 @@ import httpStatus from 'http-status';
 import { User } from '../user/user.model';
 import { TStudent } from './student.interface';
 
+// raw way
+// const getAllStudentsFromDB = async (query: Record<string, unknown>) => {
+//   const queryObj: Record<string, unknown> = { ...query };
+
+//   let searchTerm: string = '';
+
+//   const searchAbleField: string[] = [
+//     'email',
+//     'name.firstName',
+//     'presentAddress',
+//     'permanentAddress',
+//   ];
+
+//   if (query?.searchTerm) {
+//     searchTerm = query?.searchTerm as string;
+//   }
+
+//   // for searchTerm query
+
+//   const searchTermQuery = Student.find({
+//     $or: searchAbleField.map((field) => ({
+//       [field]: {
+//         $regex: searchTerm,
+//         $options: 'i',
+//       },
+//     })),
+//   });
+
+//   const excludeFields = ['searchTerm', 'sort', 'limit', 'page', 'fields'];
+//   excludeFields.forEach((el) => delete queryObj[el]);
+
+//   // for filtering without searchTerm field
+
+//   const searchFilterQuery = searchTermQuery
+//     .find(queryObj)
+//     .populate('admissionSemester')
+//     .populate({
+//       path: 'academicDepartment',
+//       populate: {
+//         path: 'academicFaculty',
+//       },
+//     });
+
+//   let sort: string = '-createdAt';
+//   if (query?.sort) {
+//     sort = query?.sort as string;
+//   }
+
+//   const searchSortQuery = searchFilterQuery.sort(sort);
+
+//   let page: number = 1;
+//   let limit: number = 0;
+//   let skip: number = 0;
+
+//   if (query?.limit) {
+//     limit = Number(query?.limit) as number;
+//   }
+
+//   if (query?.page) {
+//     page = Number(query?.page) as number;
+//     skip = (page - 1) * limit;
+//   }
+
+//   const paginationQuery = searchSortQuery.skip(skip);
+
+//   const limitQuery = paginationQuery.limit(limit);
+
+//   // fields limit
+
+//   let fields: string = '-__v';
+
+//   if (query?.fields) {
+//     fields = (query?.fields as string).split(',').join(' ');
+//   }
+
+//   const result = await limitQuery.select(fields);
+
+//   if (!result.length) {
+//     throw new AppError(httpStatus.NOT_FOUND, 'No Data Found');
+//   }
+
+//   return result;
+// };
 const getAllStudentsFromDB = async (query: Record<string, unknown>) => {
   const queryObj: Record<string, unknown> = { ...query };
 
@@ -78,7 +161,6 @@ const getAllStudentsFromDB = async (query: Record<string, unknown>) => {
   if (query?.fields) {
     fields = (query?.fields as string).split(',').join(' ');
   }
-
 
   const result = await limitQuery.select(fields);
 
