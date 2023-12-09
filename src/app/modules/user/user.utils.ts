@@ -1,4 +1,3 @@
-import { generateStudentId } from './user.utils';
 // year semesterCode 4digit number
 import { TAcademicSemester } from '../academicSemester/academicSemester.interface';
 import { User } from './user.model';
@@ -50,15 +49,15 @@ export const generateStudentId = async (payload: TAcademicSemester) => {
   return incrementId;
 };
 
-export const generateFacultyId = async () => {
+export const generateAdminFacultyId = async (role: string) => {
   let currentId = (0).toString();
-  const lastFacultyId = await findLastUserId('faculty');
+  const lastFacultyId = await findLastUserId(role);
 
   if (lastFacultyId) {
     currentId = lastFacultyId.substring(2);
   }
   let incrementId = (Number(currentId) + 1).toString().padStart(4, '0');
 
-  incrementId = `F-${incrementId}`;
+  incrementId = `A-${incrementId}`;
   return incrementId;
 };
