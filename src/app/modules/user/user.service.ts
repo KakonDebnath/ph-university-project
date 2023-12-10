@@ -5,7 +5,7 @@ import { TStudent } from '../student/student.interface';
 import { Student } from '../student/student.model';
 import { TUser } from './user.interface';
 import { User } from './user.model';
-import { generateAdminFacultyId, generateStudentId } from './user.utils';
+import { generatedId } from './user.utils';
 import AppError from '../../errors/AppError';
 import httpStatus from 'http-status';
 import { TFaculty } from '../faculty/faculty.interface';
@@ -28,7 +28,7 @@ const createStudentIntoDB = async (password: string, payload: TStudent) => {
   );
 
   //set manually generated it
-  userData.id = await generateStudentId(admissionSemester);
+  userData.id = await generatedId(admissionSemester, 'student');
 
   const session = await mongoose.startSession();
 
@@ -57,7 +57,7 @@ const createStudentIntoDB = async (password: string, payload: TStudent) => {
     await session.endSession();
 
     return newStudent;
-  } catch (err) {
+  } catch (err: any) {
     await session.abortTransaction();
     await session.endSession();
     throw new Error(err);
@@ -68,7 +68,7 @@ const createdFacultyIntoDB = async (password: string, payload: TFaculty) => {
   const userData: Partial<TUser> = {};
   userData.password = password || (config.default_password as string);
   userData.role = 'faculty';
-  userData.id = await generateAdminFacultyId('faculty');
+  userData.id = await generatedId(null, 'faculty');
 
   const session = await mongoose.startSession();
 
@@ -103,7 +103,7 @@ const createdAdminIntoDB = async (password: string, payload: TFaculty) => {
   const userData: Partial<TUser> = {};
   userData.password = password || (config.default_password as string);
   userData.role = 'admin';
-  userData.id = await generateAdminFacultyId('admin');
+  userData.id = await generatedId(null, 'admin');
 
   const session = await mongoose.startSession();
 

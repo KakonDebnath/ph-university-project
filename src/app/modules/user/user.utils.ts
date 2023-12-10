@@ -21,47 +21,92 @@ const findLastUserId = async (role: string) => {
   return lastUserId?.id ? lastUserId.id : undefined;
 };
 
-export const generateStudentId = async (payload: TAcademicSemester) => {
-  // first time 0000
-  //0001  => 1
-  let currentId = (0).toString(); // 0000 by default
-  const lastStudentId = await findLastUserId('student'); //2030010001
+// export const generateStudentId = async (payload: TAcademicSemester) => {
+//   // first time 0000
+//   //0001  => 1
+//   let currentId = (0).toString(); // 0000 by default
+//   const lastStudentId = await findLastUserId('student'); //2030010001
 
-  // get last student id from db
-  const lastStudentYear = lastStudentId?.substring(0, 4); //2030
-  const lastStudentSemesterCode = lastStudentId?.substring(4, 6); //01
-  // get current student year and semester code
-  const currentStudentYear = payload.year;
-  const currentStudentSemesterCode = payload.code;
+//   // get last student id from db
+//   const lastStudentYear = lastStudentId?.substring(0, 4); //2030
+//   const lastStudentSemesterCode = lastStudentId?.substring(4, 6); //01
+//   // get current student year and semester code
+//   const currentStudentYear = payload.year;
+//   const currentStudentSemesterCode = payload.code;
 
-  if (
-    lastStudentId &&
-    lastStudentYear === currentStudentYear &&
-    lastStudentSemesterCode === currentStudentSemesterCode
-  ) {
-    currentId = lastStudentId.substring(6); //0001
-  }
+//   if (
+//     lastStudentId &&
+//     lastStudentYear === currentStudentYear &&
+//     lastStudentSemesterCode === currentStudentSemesterCode
+//   ) {
+//     currentId = lastStudentId.substring(6); //0001
+//   }
 
-  let incrementId = (Number(currentId) + 1).toString().padStart(4, '0');
+//   let incrementId = (Number(currentId) + 1).toString().padStart(4, '0');
 
-  incrementId = `${payload.year}${payload.code}${incrementId}`;
+//   incrementId = `${payload.year}${payload.code}${incrementId}`;
 
-  return incrementId;
-};
+//   return incrementId;
+// };
 
-export const generateAdminFacultyId = async (role: string) => {
+// export const generateAdminFacultyId = async (role: string) => {
+//   let currentId = (0).toString();
+//   const lastUserId = await findLastUserId(role);
+
+//   if (lastUserId) {
+//     currentId = lastUserId.substring(2);
+//   }
+//   let incrementId = (Number(currentId) + 1).toString().padStart(4, '0');
+
+//   if (role === 'admin') {
+//     incrementId = `A-${incrementId}`;
+//   }
+//   if (role === 'faculty') {
+//     incrementId = `F-${incrementId}`;
+//   }
+
+//   return incrementId;
+// };
+
+export const generatedId = async (
+  payload: TAcademicSemester | null,
+  role: string,
+) => {
+  let incrementId: string = '';
   let currentId = (0).toString();
   const lastUserId = await findLastUserId(role);
+  if (role === 'student') {
+    // get last student id from db
+    const lastStudentYear = lastUserId?.substring(0, 4); //2030
+    const lastStudentSemesterCode = lastUserId?.substring(4, 6); //01
+    // get current student year and semester code
+    const currentStudentYear = payload?.year;
+    const currentStudentSemesterCode = payload?.code;
 
-  if (lastUserId) {
-    currentId = lastUserId.substring(2);
+    if (
+      lastUserId &&
+      lastStudentYear === currentStudentYear &&
+      lastStudentSemesterCode === currentStudentSemesterCode
+    ) {
+      currentId = lastUserId.substring(6); //0001
+    }
+
+    incrementId = (Number(currentId) + 1).toString().padStart(4, '0');
+
+    incrementId = `${currentStudentYear}${currentStudentSemesterCode}${incrementId}`;
   }
-  let incrementId = (Number(currentId) + 1).toString().padStart(4, '0');
-
   if (role === 'admin') {
+    if (lastUserId) {
+      currentId = lastUserId.substring(2);
+    }
+    incrementId = (Number(currentId) + 1).toString().padStart(4, '0');
     incrementId = `A-${incrementId}`;
   }
   if (role === 'faculty') {
+    if (lastUserId) {
+      currentId = lastUserId.substring(2);
+    }
+    incrementId = (Number(currentId) + 1).toString().padStart(4, '0');
     incrementId = `F-${incrementId}`;
   }
 
