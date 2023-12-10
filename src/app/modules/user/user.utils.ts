@@ -51,13 +51,19 @@ export const generateStudentId = async (payload: TAcademicSemester) => {
 
 export const generateAdminFacultyId = async (role: string) => {
   let currentId = (0).toString();
-  const lastFacultyId = await findLastUserId(role);
+  const lastUserId = await findLastUserId(role);
 
-  if (lastFacultyId) {
-    currentId = lastFacultyId.substring(2);
+  if (lastUserId) {
+    currentId = lastUserId.substring(2);
   }
   let incrementId = (Number(currentId) + 1).toString().padStart(4, '0');
 
-  incrementId = `A-${incrementId}`;
+  if (role === 'admin') {
+    incrementId = `A-${incrementId}`;
+  }
+  if (role === 'faculty') {
+    incrementId = `F-${incrementId}`;
+  }
+
   return incrementId;
 };
