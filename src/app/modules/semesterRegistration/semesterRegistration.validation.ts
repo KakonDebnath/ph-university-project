@@ -20,8 +20,8 @@ const updateSemesterRegistrationValidationSchema = z.object({
     status: z
       .enum([...(SemesterRegistrationStatus as [string, ...string[]])])
       .optional(),
-    startDate: z.date().optional(),
-    endDate: z.date().optional(),
+    startDate: z.string().datetime().optional(),
+    endDate: z.string().datetime().optional(),
     minCredit: z.number().optional(),
     maxCredit: z.number().optional(),
   }),
