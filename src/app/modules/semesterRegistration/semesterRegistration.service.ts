@@ -8,6 +8,19 @@ import QueryBuilder from '../../builder/QueryBuilders';
 const createSemesterRegistration = async (payload: TSemesterRegistration) => {
   const academicSemester = payload?.academicSemester;
 
+  // check if there are any registered semester that is already "UPCOMING" OR "ONGOING"
+
+  const isAnySemesterUpcomingOrOnGOING = await SemesterRegistration.findOne({
+    $or: [{ status: 'UPCOMING' }, { status: 'ONGOING' }],
+  });
+
+  if (isAnySemesterUpcomingOrOnGOING) {
+    throw new AppError(
+      httpStatus.BAD_REQUEST,
+      `There is all ready an ${isAnySemesterUpcomingOrOnGOING.status} semester`,
+    );
+  }
+
   // Check if academic semester is existing or not
   if (academicSemester) {
     const isAcademicSemesterExists =
