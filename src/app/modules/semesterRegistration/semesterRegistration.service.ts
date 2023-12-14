@@ -4,6 +4,7 @@ import { AcademicSemester } from '../academicSemester/academicSemester.model';
 import { TSemesterRegistration } from './semesterRegistration.interface';
 import { SemesterRegistration } from './semesterRegistration.model';
 import QueryBuilder from '../../builder/QueryBuilders';
+import { RegistrationStatus } from './semesterRegistration.constant';
 
 const createSemesterRegistration = async (payload: TSemesterRegistration) => {
   const academicSemester = payload?.academicSemester;
@@ -11,7 +12,10 @@ const createSemesterRegistration = async (payload: TSemesterRegistration) => {
   // check if there are any registered semester that is already "UPCOMING" OR "ONGOING"
 
   const isAnySemesterUpcomingOrOnGOING = await SemesterRegistration.findOne({
-    $or: [{ status: 'UPCOMING' }, { status: 'ONGOING' }],
+    $or: [
+      { status: RegistrationStatus.UPCOMING },
+      { status: RegistrationStatus.ONGOING },
+    ],
   });
 
   if (isAnySemesterUpcomingOrOnGOING) {
@@ -90,7 +94,7 @@ const updateSemesterRegistrationIntoDB = async (
   const currentSemesterStatus = isAcademicSemesterExists?.status;
   const requestedSemesterStatus = payload?.status;
 
-  if (currentSemesterStatus === 'ENDED') {
+  if (currentSemesterStatus === RegistrationStatus.ENDED) {
     throw new AppError(
       httpStatus.BAD_REQUEST,
       `This semester is already ${currentSemesterStatus}`,
@@ -100,8 +104,8 @@ const updateSemesterRegistrationIntoDB = async (
   // semester status "UPCOMING" ==> "ONGOING" ==> "ENDED"
 
   if (
-    currentSemesterStatus === 'UPCOMING' &&
-    requestedSemesterStatus === 'ENDED'
+    currentSemesterStatus === RegistrationStatus.UPCOMING &&
+    requestedSemesterStatus === RegistrationStatus.ENDED
   ) {
     throw new AppError(
       httpStatus.BAD_REQUEST,
@@ -109,8 +113,8 @@ const updateSemesterRegistrationIntoDB = async (
     );
   }
   if (
-    currentSemesterStatus === 'ONGOING' &&
-    requestedSemesterStatus === 'UPCOMING'
+    currentSemesterStatus === RegistrationStatus.ONGOING &&
+    requestedSemesterStatus === RegistrationStatus.UPCOMING
   ) {
     throw new AppError(
       httpStatus.BAD_REQUEST,
