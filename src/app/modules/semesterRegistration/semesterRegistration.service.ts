@@ -3,6 +3,7 @@ import AppError from '../../errors/AppError';
 import { AcademicSemester } from '../academicSemester/academicSemester.model';
 import { TSemesterRegistration } from './semesterRegistration.interface';
 import { SemesterRegistration } from './semesterRegistration.model';
+import QueryBuilder from '../../builder/QueryBuilders';
 
 const createSemesterRegistration = async (payload: TSemesterRegistration) => {
   const academicSemester = payload?.academicSemester;
@@ -35,8 +36,22 @@ const createSemesterRegistration = async (payload: TSemesterRegistration) => {
   return result;
 };
 
-const getAllSemesterRegistrationFromDB = async () => {
-  const result = await SemesterRegistration.find();
+const getAllSemesterRegistrationFromDB = async (
+  query: Record<string, unknown>,
+) => {
+  const semesterRegistrationQuery = new QueryBuilder(
+    SemesterRegistration.find().populate('academicSemester'),
+    query,
+  )
+    .filter()
+    .sort()
+    .pagination()
+    .fields();
+
+  const result = await semesterRegistrationQuery.modelQuery;
+  if (!result.length) {
+    throw new AppError(httpStatus.NOT_FOUND, 'No Data Found');
+  }
   return result;
 };
 
