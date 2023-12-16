@@ -1,12 +1,13 @@
 import { TSchedule } from './offeredCourse.interface';
 
-export const hasTimeConflict = (
-  assignedSchedules: TSchedule[],
+const hasTimeConflict = (
+  existingSchedules: TSchedule[],
   newSchedule: TSchedule,
 ) => {
-  for (const schedule of assignedSchedules) {
-    const existingStartTime = new Date(`1970-01-01T${schedule.startTime}`);
-    const existingEndTime = new Date(`1970-01-01T${schedule.endTime}`);
+  for (const exSchedule of existingSchedules) {
+    const existingStartTime = new Date(`1970-01-01T${exSchedule.startTime}`);
+    const existingEndTime = new Date(`1970-01-01T${exSchedule.endTime}`);
+
     const newStartTime = new Date(`1970-01-01T${newSchedule.startTime}`);
     const newEndTime = new Date(`1970-01-01T${newSchedule.endTime}`);
 
@@ -19,3 +20,5 @@ export const hasTimeConflict = (
 
   return false;
 };
+
+export default hasTimeConflict;
