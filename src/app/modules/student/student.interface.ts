@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 import { Model, Types } from 'mongoose';
 import TUserName from '../../interface/userName';
 import TBloodGroup from '../../interface/bloodGroup';
