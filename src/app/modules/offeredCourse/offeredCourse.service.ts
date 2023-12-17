@@ -91,6 +91,7 @@ const createOfferedCourseIntoDB = async (payload: TOfferedCourse) => {
       `Offered course With same section already exists`,
     );
   }
+
   // get the schedules of the faculties
   const existingSchedules = await OfferedCourse.find({
     semesterRegistration,
@@ -125,8 +126,52 @@ const getSingleOfferedCourseFromDB = async (id: string) => {};
 
 const updateOfferedCourseIntoDB = async (
   id: string,
-  payload: Partial<TOfferedCourse>,
-) => {};
+  payload: Pick<TOfferedCourse, 'faculty' | 'days' | 'startTime' | 'endTime'>,
+) => {
+  const { faculty, days, startTime, endTime } = payload;
+  // Check if semester registration id is exist on the db collection
+  const isOfferedCourseExists = await OfferedCourse.findById(id);
+
+  if (!isOfferedCourseExists) {
+    throw new AppError(httpStatus.NOT_FOUND, 'Offered Course not found');
+  }
+
+  // Check if Course id is exist on the db collection
+  const isFacultyExists = await Faculty.findById(faculty);
+
+  if (!isFacultyExists) {
+    throw new AppError(httpStatus.NOT_FOUND, 'Faculty is not found');
+  }
+
+  const semesterRegistration = isOfferedCourseExists.semesterRegistration;
+  // get the schedules of the faculties
+  const existingSchedules = await OfferedCourse.find({
+    semesterRegistration,
+    faculty,
+    days: { $in: days },
+  }).select('days startTime endTime');
+
+  // new schedule comes from payload
+  const newSchedule = {
+    days,
+    startTime,
+    endTime,
+  };
+
+  // check new schedule time is already exist in for this faculty
+
+  if (hasTimeConflict(existingSchedules, newSchedule)) {
+    throw new AppError(
+      httpStatus.CONFLICT,
+      `This faculty is not available at that time! Please choose another day or time`,
+    );
+  }
+
+  const result = await OfferedCourse.findByIdAndUpdate(id, payload, {
+    new: true,
+  });
+  return result;
+};
 
 const deleteOfferedCourseFromDB = async (id: string) => {};
 
