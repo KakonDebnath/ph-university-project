@@ -15,7 +15,6 @@ const auth = (...requiredRoles: TUserRole[]) => {
     if (!token) {
       throw new AppError(httpStatus.UNAUTHORIZED, 'You are not authorized!!');
     }
-    console.log(requiredRoles);
 
     // check if the token is valid
 
@@ -30,8 +29,6 @@ const auth = (...requiredRoles: TUserRole[]) => {
           );
         }
         const role = (decoded as JwtPayload)?.role;
-        
-        console.log(role);
 
         if (requiredRoles && !requiredRoles.includes(role)) {
           throw new AppError(

@@ -2,6 +2,8 @@ import { Router } from 'express';
 import requestValidator from '../../middlewares/requestValidator';
 import { AuthValidations } from './auth.validation';
 import { AuthControllers } from './auth.controller';
+import auth from '../../middlewares/auth';
+import { USER_ROLE } from '../user/user.constant';
 
 const router = Router();
 
@@ -12,7 +14,8 @@ router.post(
 );
 router.post(
   '/changePassword',
-  // requestValidator(AuthValidations.changePasswordValidationSchema),
+  auth(USER_ROLE.admin, USER_ROLE.faculty, USER_ROLE.student),
+  requestValidator(AuthValidations.changePasswordValidationSchema),
   AuthControllers.changePassword,
 );
 
