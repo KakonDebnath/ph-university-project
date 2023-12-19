@@ -11,6 +11,7 @@ import httpStatus from 'http-status';
 import { TFaculty } from '../faculty/faculty.interface';
 import { Faculty } from '../faculty/faculty.model';
 import { Admin } from '../admin/admin.model';
+import { AcademicDepartment } from '../academicDepartment/academicDepartment.model';
 
 const createStudentIntoDB = async (password: string, payload: TStudent) => {
   // create a user object
@@ -24,8 +25,20 @@ const createStudentIntoDB = async (password: string, payload: TStudent) => {
 
   // find academic semester info
   const admissionSemester = await AcademicSemester.findById(
-    payload.admissionSemester,
+    payload?.admissionSemester,
   );
+
+  // check admission semester exists or not
+  if(!admissionSemester){
+    throw new AppError(httpStatus.NOT_FOUND, 'Academic Semester not found');
+  }
+
+  // check academic Department exists or not
+  const isAcademicDepartmentExists = AcademicDepartment.findById(payload?.academicDepartment);
+
+   if(!isAcademicDepartmentExists){
+    throw new AppError(httpStatus.NOT_FOUND, 'Academic Department not found');
+  }
 
   //set manually generated it
   userData.id = await generatedId(admissionSemester, 'student');
