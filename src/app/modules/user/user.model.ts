@@ -69,4 +69,22 @@ userSchema.statics.isPasswordValid = async function (
   return bcrypt.compare(plainTextPassword, hashPassword);
 };
 
+userSchema.statics.isJwtIssuedBeforePasswordChanged = async function (
+  passwordChangeAtTimeStamp: Date,
+  jwtIssuedTimeStamp: number,
+) {
+  const convertPasswordChangeAtTimeStampToMilliseconds =
+    new Date(passwordChangeAtTimeStamp).getTime() / 1000; // because jwtIssuedTimeStamp is seconds
+
+  const compareTime =
+    convertPasswordChangeAtTimeStampToMilliseconds > jwtIssuedTimeStamp;
+
+  // console.log(compareTime, {
+  //   convertPasswordChangeAtTimeStampToMilliseconds,
+  //   jwtIssuedTimeStamp,
+  // });
+
+  return compareTime;
+};
+
 export const User = model<TUser, UserModel>('User', userSchema);

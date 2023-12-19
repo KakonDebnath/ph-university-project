@@ -29,14 +29,16 @@ const createStudentIntoDB = async (password: string, payload: TStudent) => {
   );
 
   // check admission semester exists or not
-  if(!admissionSemester){
+  if (!admissionSemester) {
     throw new AppError(httpStatus.NOT_FOUND, 'Academic Semester not found');
   }
 
   // check academic Department exists or not
-  const isAcademicDepartmentExists = AcademicDepartment.findById(payload?.academicDepartment);
+  const isAcademicDepartmentExists = AcademicDepartment.findById(
+    payload?.academicDepartment,
+  );
 
-   if(!isAcademicDepartmentExists){
+  if (!isAcademicDepartmentExists) {
     throw new AppError(httpStatus.NOT_FOUND, 'Academic Department not found');
   }
 
@@ -83,6 +85,14 @@ const createdFacultyIntoDB = async (password: string, payload: TFaculty) => {
   userData.role = 'faculty';
   userData.id = await generatedId(null, 'faculty');
 
+  const isAcademicDepartmentExists = await AcademicDepartment.findById(
+    payload.academicDepartment,
+  );
+
+  if (!isAcademicDepartmentExists) {
+    throw new AppError(httpStatus.NOT_FOUND, 'Academic Department not found');
+  }
+
   const session = await mongoose.startSession();
 
   try {
@@ -112,6 +122,7 @@ const createdFacultyIntoDB = async (password: string, payload: TFaculty) => {
     throw new Error(err);
   }
 };
+
 const createdAdminIntoDB = async (password: string, payload: TFaculty) => {
   const userData: Partial<TUser> = {};
   userData.password = password || (config.default_password as string);

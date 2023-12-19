@@ -41,6 +41,21 @@ const auth = (...requiredRoles: TUserRole[]) => {
       throw new AppError(httpStatus.FORBIDDEN, 'This User is blocked');
     }
 
+    // if password has been changed after issue 
+
+    if (
+      user.passwordChangeAt &&
+      (await User.isJwtIssuedBeforePasswordChanged(
+        user.passwordChangeAt,
+        iat as number,
+      ))
+    ) {
+      throw new AppError(
+        httpStatus.UNAUTHORIZED,
+        'You are not authorized !!!!!',
+      );
+    }
+
     if (requiredRoles && !requiredRoles.includes(role)) {
       throw new AppError(
         httpStatus.UNAUTHORIZED,
