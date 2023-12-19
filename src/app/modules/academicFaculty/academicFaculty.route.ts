@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { AcademicFacultyControllers } from './academicFaculty.controller';
 import requestValidator from '../../middlewares/requestValidator';
 import { academicFacultyValidations } from './academicFaculty.validation';
+import auth from '../../middlewares/auth';
 
 const router = Router();
 
@@ -13,7 +14,7 @@ router.post(
   AcademicFacultyControllers.createAcademicFacultyIntoDB,
 );
 
-router.get('/', AcademicFacultyControllers.getAllAcademicFacultyFormDB);
+router.get('/', auth(), AcademicFacultyControllers.getAllAcademicFacultyFormDB);
 
 router.get(
   '/:facultyId',
