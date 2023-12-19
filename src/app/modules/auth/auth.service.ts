@@ -50,7 +50,6 @@ const loginUser = async (payload: TLoginUser) => {
 };
 
 const changePassword = async (userData: JwtPayload, payload: TPassword) => {
-
   // Check if the user is exist
   const user = await User.isUserExistByCustomId(userData?.userId);
 
@@ -86,6 +85,7 @@ const changePassword = async (userData: JwtPayload, payload: TPassword) => {
     {
       password: newHashedPassword,
       needsPasswordChange: false,
+      passwordChangeAt: new Date(),
     },
   );
 
