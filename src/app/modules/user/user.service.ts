@@ -14,15 +14,6 @@ import { Admin } from '../admin/admin.model';
 import { AcademicDepartment } from '../academicDepartment/academicDepartment.model';
 
 const createStudentIntoDB = async (password: string, payload: TStudent) => {
-  // create a user object
-  const userData: Partial<TUser> = {};
-
-  //if password is not given , use default password
-  userData.password = password || (config.default_password as string);
-
-  //set student role
-  userData.role = 'student';
-
   // find academic semester info
   const admissionSemester = await AcademicSemester.findById(
     payload?.admissionSemester,
@@ -41,6 +32,16 @@ const createStudentIntoDB = async (password: string, payload: TStudent) => {
   if (!isAcademicDepartmentExists) {
     throw new AppError(httpStatus.NOT_FOUND, 'Academic Department not found');
   }
+  // create a user object
+  const userData: Partial<TUser> = {};
+
+  //if password is not given , use default password
+  userData.password = password || (config.default_password as string);
+
+  //set student role
+  userData.role = 'student';
+  //set student email
+  userData.email = payload?.email;
 
   //set manually generated it
   userData.id = await generatedId(admissionSemester, 'student');
@@ -80,11 +81,7 @@ const createStudentIntoDB = async (password: string, payload: TStudent) => {
 };
 
 const createdFacultyIntoDB = async (password: string, payload: TFaculty) => {
-  const userData: Partial<TUser> = {};
-  userData.password = password || (config.default_password as string);
-  userData.role = 'faculty';
-  userData.id = await generatedId(null, 'faculty');
-
+  // check academic department is already exists or is not
   const isAcademicDepartmentExists = await AcademicDepartment.findById(
     payload.academicDepartment,
   );
@@ -92,6 +89,16 @@ const createdFacultyIntoDB = async (password: string, payload: TFaculty) => {
   if (!isAcademicDepartmentExists) {
     throw new AppError(httpStatus.NOT_FOUND, 'Academic Department not found');
   }
+
+  const userData: Partial<TUser> = {};
+  // set faculty password
+  userData.password = password || (config.default_password as string);
+  // set faculty role
+  userData.role = 'faculty';
+  //set faculty email
+  userData.email = payload?.email;
+  // set faculty id
+  userData.id = await generatedId(null, 'faculty');
 
   const session = await mongoose.startSession();
 
@@ -124,9 +131,22 @@ const createdFacultyIntoDB = async (password: string, payload: TFaculty) => {
 };
 
 const createdAdminIntoDB = async (password: string, payload: TFaculty) => {
+   // check academic department is already exists or is not
+   const isAcademicDepartmentExists = await AcademicDepartment.findById(
+    payload.academicDepartment,
+  );
+
+  if (!isAcademicDepartmentExists) {
+    throw new AppError(httpStatus.NOT_FOUND, 'Academic Department not found');
+  }
   const userData: Partial<TUser> = {};
+  // set admin password
   userData.password = password || (config.default_password as string);
+  // set admin role
   userData.role = 'admin';
+  // set admin email
+  userData.email = payload?.email;
+  // set admin id
   userData.id = await generatedId(null, 'admin');
 
   const session = await mongoose.startSession();
