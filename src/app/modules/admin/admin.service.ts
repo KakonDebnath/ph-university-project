@@ -84,10 +84,10 @@ const updateAdmin = async (id: string, payload: Partial<TAdmin>) => {
     await session.endSession();
 
     return adminUpdate;
-  } catch (error: any) {
+  } catch (error) {
     await session.abortTransaction();
     await session.endSession();
-    throw new Error(error);
+    throw new AppError(httpStatus.BAD_REQUEST, 'Failed to delete Admin');
   }
 };
 
@@ -126,10 +126,10 @@ const deleteAdmin = async (id: string) => {
     await session.endSession();
 
     return deletedAdmin;
-  } catch (error: any) {
+  } catch (error) {
     await session.abortTransaction();
     await session.endSession();
-    throw new Error(error);
+    throw new AppError(httpStatus.BAD_REQUEST, 'Failed to delete Admin');
   }
 };
 

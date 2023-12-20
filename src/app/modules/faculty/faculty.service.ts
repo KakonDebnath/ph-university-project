@@ -88,10 +88,10 @@ const updateFaculty = async (id: string, payload: Partial<TFaculty>) => {
     await session.endSession();
 
     return facultyUpdate;
-  } catch (error: any) {
+  } catch (error) {
     await session.abortTransaction();
     await session.endSession();
-    throw new Error(error);
+    throw new AppError(httpStatus.BAD_REQUEST, 'Failed to delete Faculty');
   }
 };
 
@@ -130,10 +130,10 @@ const deleteFaculty = async (id: string) => {
     await session.endSession();
 
     return deletedFaculty;
-  } catch (error: any) {
+  } catch (error) {
     await session.abortTransaction();
     await session.endSession();
-    throw new Error(error);
+    throw new AppError(httpStatus.BAD_REQUEST, 'Failed to delete Faculty');
   }
 };
 

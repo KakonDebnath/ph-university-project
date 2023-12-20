@@ -212,10 +212,10 @@ const updateStudentIntoDB = async (id: string, payload: Partial<TStudent>) => {
   
     return updateStudentData;
     
-  } catch (error: any) {
+  } catch (error) {
     await session.abortTransaction();
     await session.endSession();
-    throw new Error(error);
+    throw new AppError(httpStatus.BAD_REQUEST, 'Failed to delete student');
   }
 };
 
