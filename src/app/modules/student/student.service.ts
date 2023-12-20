@@ -136,49 +136,87 @@ const getSingleStudentFromDB = async (id: string) => {
 };
 
 const updateStudentIntoDB = async (id: string, payload: Partial<TStudent>) => {
-  const { name, guardian, localGuardian, ...remainingStudentData } = payload;
 
-  const modifiedUpdatedData: Record<string, unknown> = {
-    ...remainingStudentData,
-  };
 
-  /*
-    guardain: {
-      fatherOccupation:"Teacher"
+  const session = await mongoose.startSession();
+  try {
+    const { name, guardian, localGuardian, ...remainingStudentData } = payload;
+
+    const modifiedUpdatedData: Record<string, unknown> = {
+      ...remainingStudentData,
+    };
+  
+    /*
+      guardain: {
+        fatherOccupation:"Teacher"
+      }
+  
+      guardian.fatherOccupation = Teacher
+  
+      name.firstName = 'Mezba'
+      name.lastName = 'Abedin'
+    */
+  
+    if (name && Object.keys(name).length) {
+      for (const [key, value] of Object.entries(name)) {
+        modifiedUpdatedData[`name.${key}`] = value;
+      }
+    }
+  
+    if (guardian && Object.keys(guardian).length) {
+      for (const [key, value] of Object.entries(guardian)) {
+        modifiedUpdatedData[`guardian.${key}`] = value;
+      }
+    }
+  
+    if (localGuardian && Object.keys(localGuardian).length) {
+      for (const [key, value] of Object.entries(localGuardian)) {
+        modifiedUpdatedData[`localGuardian.${key}`] = value;
+      }
+    }
+  
+    // console.log(modifiedUpdatedData);
+  // transaction -1 
+  session.startTransaction();
+    const updateStudentData = await Student.findOneAndUpdate({ id }, modifiedUpdatedData, {
+      new: true,
+      runValidators: true,
+      session
+    });
+
+    
+    if (!updateStudentData) {
+      throw new AppError(httpStatus.BAD_REQUEST, 'Failed to Update Student');
     }
 
-    guardian.fatherOccupation = Teacher
 
-    name.firstName = 'Mezba'
-    name.lastName = 'Abedin'
-  */
+    // transition -2 update user
+    const userId = updateStudentData.user;
 
-  if (name && Object.keys(name).length) {
-    for (const [key, value] of Object.entries(name)) {
-      modifiedUpdatedData[`name.${key}`] = value;
+    const updateUser = await User.findByIdAndUpdate(
+      userId,
+      modifiedUpdatedData,
+      {
+        new: true,
+        runValidators: true,
+        session,
+      },
+    );
+
+    if (!updateUser) {
+      throw new AppError(httpStatus.BAD_REQUEST, 'Failed to Update User');
     }
+
+    await session.commitTransaction();
+    await session.endSession();
+  
+    return updateStudentData;
+    
+  } catch (error: any) {
+    await session.abortTransaction();
+    await session.endSession();
+    throw new Error(error);
   }
-
-  if (guardian && Object.keys(guardian).length) {
-    for (const [key, value] of Object.entries(guardian)) {
-      modifiedUpdatedData[`guardian.${key}`] = value;
-    }
-  }
-
-  if (localGuardian && Object.keys(localGuardian).length) {
-    for (const [key, value] of Object.entries(localGuardian)) {
-      modifiedUpdatedData[`localGuardian.${key}`] = value;
-    }
-  }
-
-  // console.log(modifiedUpdatedData);
-
-  const result = await Student.findOneAndUpdate({ id }, modifiedUpdatedData, {
-    new: true,
-    runValidators: true,
-  });
-
-  return result;
 };
 
 const deleteStudentFromDB = async (id: string) => {
