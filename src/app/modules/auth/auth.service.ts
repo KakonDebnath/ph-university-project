@@ -105,7 +105,56 @@ const changePassword = async (userData: JwtPayload, payload: TPassword) => {
 //refresh token
 
 const refreshToken = async (token: string) => {
-  
+  // check if the token is valid
+  const decoded = jwt.verify(
+    token,
+    config.jwt_refresh_secret as string,
+  ) as JwtPayload;
+
+  const { userId, iat } = decoded;
+
+  // Check if the user is exist
+  const user = await User.isUserExistByCustomId(userId);
+
+  if (!user) {
+    throw new AppError(httpStatus.NOT_FOUND, 'User is not found');
+  }
+  // Check if the user is already deleted
+  if (user?.isDeleted) {
+    throw new AppError(httpStatus.FORBIDDEN, 'This User is already deleted');
+  }
+  // Check if the user is blocked
+  if (user?.status === 'blocked') {
+    throw new AppError(httpStatus.FORBIDDEN, 'This User is blocked');
+  }
+
+  // if password has been changed after issue
+
+  if (
+    user.passwordChangeAt &&
+    (await User.isJwtIssuedBeforePasswordChanged(
+      user.passwordChangeAt,
+      iat as number,
+    ))
+  ) {
+    throw new AppError(httpStatus.UNAUTHORIZED, 'You are not authorized !!!');
+  }
+  // create jwt access_token and send it to the client
+
+  const jwtPayload = {
+    userId: user.id,
+    role: user.role,
+  };
+
+  const accessToken = createToken(
+    jwtPayload,
+    config.jwt_access_secret as string,
+    config.jwt_access_expires_in as string,
+  );
+
+  return {
+    accessToken,
+  };
 };
 
 export const AuthServices = {

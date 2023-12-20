@@ -13,7 +13,7 @@ const loginUser = catchAsync(async (req, res) => {
     secure: config.NODE_ENV === 'production',
     httpOnly: true,
   });
-  
+
   sendResponse(res, {
     statusCode: httpStatus.OK,
     success: true,
@@ -35,13 +35,13 @@ const changePassword = catchAsync(async (req, res) => {
   });
 });
 const refreshToken = catchAsync(async (req, res) => {
-  const refreshToken = req.cookies.refreshToken;
+  const { refreshToken } = req.cookies;
   const result = await AuthServices.refreshToken(refreshToken);
 
   sendResponse(res, {
     statusCode: httpStatus.OK,
     success: true,
-    message: 'Refresh Token successfully',
+    message: 'Access Token is retrieved successfully',
     data: result,
   });
 });
