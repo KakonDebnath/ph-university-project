@@ -2,10 +2,10 @@ import { NextFunction, Request, Response } from 'express';
 import catchAsync from '../utils/catchAsync';
 import AppError from '../errors/AppError';
 import httpStatus from 'http-status';
-import jwt, { JwtPayload } from 'jsonwebtoken';
 import config from '../config';
 import { TUserRole } from '../modules/user/user.interface';
 import { User } from '../modules/user/user.model';
+import { verifyToken } from '../modules/auth/auth.utils';
 
 const auth = (...requiredRoles: TUserRole[]) => {
   return catchAsync(async (req: Request, res: Response, next: NextFunction) => {
@@ -19,10 +19,7 @@ const auth = (...requiredRoles: TUserRole[]) => {
 
     // check if the token is valid
 
-    const decoded = jwt.verify(
-      token,
-      config.jwt_access_secret as string,
-    ) as JwtPayload;
+    const decoded = verifyToken(token, config.jwt_access_secret as string);
 
     const { userId, role, iat } = decoded;
 
@@ -41,7 +38,7 @@ const auth = (...requiredRoles: TUserRole[]) => {
       throw new AppError(httpStatus.FORBIDDEN, 'This User is blocked');
     }
 
-    // if password has been changed after issue 
+    // if password has been changed after issue
 
     if (
       user.passwordChangeAt &&
