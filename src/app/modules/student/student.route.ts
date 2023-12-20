@@ -2,12 +2,20 @@ import express from 'express';
 import { StudentControllers } from './student.controller';
 import requestValidator from '../../middlewares/requestValidator';
 import { studentValidations } from './student.validation';
+import auth from '../../middlewares/auth';
 
 const router = express.Router();
 
-router.get('/', StudentControllers.getAllStudents);
+router.get(
+  '/',
+  StudentControllers.getAllStudents,
+);
 
-router.get('/:studentId', StudentControllers.getSingleStudent);
+router.get(
+  '/:studentId',
+  auth('admin', 'faculty', 'student'),
+  StudentControllers.getSingleStudent,
+);
 
 router.patch(
   '/:studentId',

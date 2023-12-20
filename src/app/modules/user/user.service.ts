@@ -25,8 +25,8 @@ const createStudentIntoDB = async (password: string, payload: TStudent) => {
   }
 
   // check academic Department exists or not
-  const isAcademicDepartmentExists = AcademicDepartment.findById(
-    payload?.academicDepartment,
+  const isAcademicDepartmentExists = await AcademicDepartment.findById(
+    payload.academicDepartment,
   );
 
   if (!isAcademicDepartmentExists) {
@@ -73,10 +73,10 @@ const createStudentIntoDB = async (password: string, payload: TStudent) => {
     await session.endSession();
 
     return newStudent;
-  } catch (err: any) {
+  } catch (err) {
     await session.abortTransaction();
     await session.endSession();
-    throw new Error(err);
+    throw new AppError(httpStatus.BAD_REQUEST, 'Failed to Create student');
   }
 };
 
@@ -123,16 +123,16 @@ const createdFacultyIntoDB = async (password: string, payload: TFaculty) => {
     await session.commitTransaction();
     await session.endSession();
     return newFaculty;
-  } catch (err: any) {
+  } catch (err) {
     await session.abortTransaction();
     await session.endSession();
-    throw new Error(err);
+    throw new AppError(httpStatus.BAD_REQUEST, 'Failed to Create Faculty');
   }
 };
 
 const createdAdminIntoDB = async (password: string, payload: TFaculty) => {
-   // check academic department is already exists or is not
-   const isAcademicDepartmentExists = await AcademicDepartment.findById(
+  // check academic department is already exists or is not
+  const isAcademicDepartmentExists = await AcademicDepartment.findById(
     payload.academicDepartment,
   );
 
@@ -172,10 +172,10 @@ const createdAdminIntoDB = async (password: string, payload: TFaculty) => {
     await session.commitTransaction();
     await session.endSession();
     return newAdmin;
-  } catch (err: any) {
+  } catch (err) {
     await session.abortTransaction();
     await session.endSession();
-    throw new Error(err);
+    throw new AppError(httpStatus.BAD_REQUEST, 'Failed to Create Admin');
   }
 };
 
