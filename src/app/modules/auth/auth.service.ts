@@ -102,7 +102,14 @@ const changePassword = async (userData: JwtPayload, payload: TPassword) => {
   return null;
 };
 
+//refresh token
+
+const refreshToken = async (token: string) => {
+  
+};
+
 export const AuthServices = {
   loginUser,
   changePassword,
+  refreshToken,
 };
