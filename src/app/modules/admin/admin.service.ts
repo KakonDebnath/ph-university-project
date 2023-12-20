@@ -52,9 +52,11 @@ const updateAdmin = async (id: string, payload: Partial<TAdmin>) => {
   const session = await mongoose.startSession();
   try {
     session.startTransaction();
+    // transition -1 update admin
     const adminUpdate = await Admin.findByIdAndUpdate(id, modifiedUpdatedData, {
       new: true,
       runValidators: true,
+      session,
     });
 
     if (!adminUpdate) {
@@ -63,18 +65,23 @@ const updateAdmin = async (id: string, payload: Partial<TAdmin>) => {
 
     const userId = adminUpdate.user;
 
+    // transition - 2 update user
     const updateUser = await User.findByIdAndUpdate(
       userId,
       modifiedUpdatedData,
       {
         new: true,
         runValidators: true,
+        session,
       },
     );
 
     if (!updateUser) {
       throw new AppError(httpStatus.BAD_REQUEST, 'Failed to Update User');
     }
+
+    await session.commitTransaction();
+    await session.endSession();
 
     return adminUpdate;
   } catch (error: any) {

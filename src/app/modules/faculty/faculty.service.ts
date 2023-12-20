@@ -49,12 +49,50 @@ const updateFaculty = async (id: string, payload: Partial<TFaculty>) => {
     }
   }
 
-  const result = await Faculty.findByIdAndUpdate(id, modifiedUpdatedData, {
-    new: true,
-    runValidators: true,
-  });
+  const session = await mongoose.startSession();
+  try {
+    session.startTransaction();
+    // transition -1 update faculty
+    const facultyUpdate = await Faculty.findByIdAndUpdate(
+      id,
+      modifiedUpdatedData,
+      {
+        new: true,
+        runValidators: true,
+        session,
+      },
+    );
 
-  return result;
+    if (!facultyUpdate) {
+      throw new AppError(httpStatus.BAD_REQUEST, 'Failed to Update Faculty');
+    }
+
+    // transition -2 update user
+    const userId = facultyUpdate.user;
+
+    const updateUser = await User.findByIdAndUpdate(
+      userId,
+      modifiedUpdatedData,
+      {
+        new: true,
+        runValidators: true,
+        session,
+      },
+    );
+
+    if (!updateUser) {
+      throw new AppError(httpStatus.BAD_REQUEST, 'Failed to Update User');
+    }
+
+    await session.commitTransaction();
+    await session.endSession();
+
+    return facultyUpdate;
+  } catch (error: any) {
+    await session.abortTransaction();
+    await session.endSession();
+    throw new Error(error);
+  }
 };
 
 const deleteFaculty = async (id: string) => {
