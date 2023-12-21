@@ -1,3 +1,4 @@
+
 import mongoose from 'mongoose';
 import config from '../../config';
 import { AcademicSemester } from '../academicSemester/academicSemester.model';
@@ -12,7 +13,7 @@ import { TFaculty } from '../faculty/faculty.interface';
 import { Faculty } from '../faculty/faculty.model';
 import { Admin } from '../admin/admin.model';
 import { AcademicDepartment } from '../academicDepartment/academicDepartment.model';
-import { verifyToken } from '../auth/auth.utils';
+import { JwtPayload } from 'jsonwebtoken';
 
 const createStudentIntoDB = async (password: string, payload: TStudent) => {
   // find academic semester info
@@ -180,11 +181,31 @@ const createdAdminIntoDB = async (password: string, payload: TFaculty) => {
   }
 };
 
-const getMeFromDB = async (token: string) => {
-  // verify token
-  const decoded = verifyToken(token, config.jwt_access_secret as string);
+const changeStatus = async (id: string, payload: { status: string }) => {
+  // check if the user is already exist or not
+  const isUserExist = await User.findById(id);
 
-  const { userId, role } = decoded;
+  if (!isUserExist) {
+    throw new AppError(httpStatus.NOT_FOUND, 'User not found!');
+  }
+  // if the user status is already changed what comes form payload
+  if (isUserExist.status === payload?.status) {
+    throw new AppError(
+      httpStatus.NOT_FOUND,
+      `This User status is already ${payload.status}`,
+    );
+  }
+
+  const result = await User.findByIdAndUpdate(id, payload, {
+    new: true,
+    runValidators: true,
+  });
+
+  return result;
+};
+
+const getMeFromDB = async (payload: JwtPayload) => {
+  const { userId, role } = payload;
 
   let result = null;
 
@@ -210,4 +231,5 @@ export const UserServices = {
   createdFacultyIntoDB,
   createdAdminIntoDB,
   getMeFromDB,
+  changeStatus,
 };
