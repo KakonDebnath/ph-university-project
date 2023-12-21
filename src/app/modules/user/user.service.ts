@@ -1,4 +1,3 @@
-
 import mongoose from 'mongoose';
 import config from '../../config';
 import { AcademicSemester } from '../academicSemester/academicSemester.model';
@@ -14,6 +13,7 @@ import { Faculty } from '../faculty/faculty.model';
 import { Admin } from '../admin/admin.model';
 import { AcademicDepartment } from '../academicDepartment/academicDepartment.model';
 import { JwtPayload } from 'jsonwebtoken';
+import { sendImageToCloudinary } from '../../utils/sendImageToCloudnary';
 
 const createStudentIntoDB = async (password: string, payload: TStudent) => {
   // find academic semester info
@@ -47,6 +47,10 @@ const createStudentIntoDB = async (password: string, payload: TStudent) => {
 
   //set manually generated it
   userData.id = await generatedId(admissionSemester, 'student');
+
+  // send image to cloudinary server
+
+  sendImageToCloudinary();
 
   const session = await mongoose.startSession();
 
