@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import mongoose from 'mongoose';
 import config from '../../config';
 import { AcademicSemester } from '../academicSemester/academicSemester.model';
@@ -15,7 +16,11 @@ import { AcademicDepartment } from '../academicDepartment/academicDepartment.mod
 import { JwtPayload } from 'jsonwebtoken';
 import { sendImageToCloudinary } from '../../utils/sendImageToCloudnary';
 
-const createStudentIntoDB = async (password: string, payload: TStudent) => {
+const createStudentIntoDB = async (
+  file: any,
+  password: string,
+  payload: TStudent,
+) => {
   // find academic semester info
   const admissionSemester = await AcademicSemester.findById(
     payload?.admissionSemester,
@@ -50,7 +55,11 @@ const createStudentIntoDB = async (password: string, payload: TStudent) => {
 
   // send image to cloudinary server
 
-  sendImageToCloudinary();
+  const imageName: string = `${userData?.id}-${payload?.name?.firstName}`;
+
+  const filePath: string = file?.path;
+
+  const { secure_url } = await sendImageToCloudinary(imageName, filePath);
 
   const session = await mongoose.startSession();
 
@@ -64,15 +73,15 @@ const createStudentIntoDB = async (password: string, payload: TStudent) => {
       throw new AppError(httpStatus.BAD_REQUEST, 'Failed to create user');
     }
 
-    // set id , _id as user
+    // set id , _id as user , profile image
     payload.id = newUser[0].id;
     payload.user = newUser[0]._id; //reference _id
-
+    payload.profileImg = secure_url;
     //create a student
     // Start transaction -2
     const newStudent = await Student.create([payload], { session });
     if (!newStudent.length) {
-      throw new AppError(httpStatus.BAD_REQUEST, 'Failed to create student');
+      throw new AppError(httpStatus.BAD_REQUEST, 'Failed to create student!');
     }
 
     await session.commitTransaction();
@@ -82,7 +91,7 @@ const createStudentIntoDB = async (password: string, payload: TStudent) => {
   } catch (err) {
     await session.abortTransaction();
     await session.endSession();
-    throw new AppError(httpStatus.BAD_REQUEST, 'Failed to Create student');
+    throw new AppError(httpStatus.BAD_REQUEST, 'Failed to Create student!!');
   }
 };
 

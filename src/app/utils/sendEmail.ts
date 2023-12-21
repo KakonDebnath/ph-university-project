@@ -9,7 +9,7 @@ export const sendEmail = async (to: string, html: string) => {
     auth: {
       // TODO: replace `user` and `pass` values from <https://forwardemail.net>
       user: 'pronobparsonal@gmail.com',
-      pass: config.nodemailer_password,
+      pass: config.nodemailer_password, //ucjk ryfw mqps svij
     },
   });
 
